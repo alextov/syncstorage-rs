@@ -516,12 +516,16 @@ pub async fn get_bso(
                     collection: bso_req.collection,
                     id: bso_req.bso,
                 })
-                .await?;
+                .await;
 
-            Ok(result.map_or_else(
-                || HttpResponse::NotFound().finish(),
-                |bso| HttpResponse::Ok().json(bso),
-            ))
+            match result {
+                Ok(Some(bso)) => Ok(HttpResponse::Ok().json(bso)),
+                Ok(None) => Ok(HttpResponse::NotFound().finish()),
+                Err(e) => {
+                    info!("🧯 Database error {}", e);
+                    Err(ApiError::from(e))
+                },
+            }
         })
         .await
 }
