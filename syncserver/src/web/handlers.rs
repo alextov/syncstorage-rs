@@ -525,7 +525,13 @@ pub async fn get_bso(
                     collection: bso_req.collection,
                     id: bso_req.bso,
                 })
-                .await?;
+                .await;
+
+            match result {
+                Err(e) => {
+                    info!("🧯 Database error {}", e);
+                },
+            }
 
             Ok(result.map_or_else(
                 || HttpResponse::NotFound().finish(),
